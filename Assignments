@@ -1,0 +1,298 @@
+R Assignment 
+
+1)
+install.packages("data.table")
+install.packages("RSQLite")
+install.packages("ggplot2")
+library(DBI)
+library(RSQLite)
+con <- dbConnect(RSQLite::SQLite(),'wooldridge2.db')
+dbListTables(con)
+wage1 <- data.table(dbReadTable(con,'wage1'))
+head(wage1)
+library(data.table)
+dbReadTable(con,'wage1_labels')
+labels(wage1)
+a)          summary(wage1$educ)
+Ans.  Min of Educ         : 0.0
+Max of Educ        : 18.00
+Average of Educ : 12.56
+b) 	summary(wage1$wage)
+Ans. Mean of Hourly wage : 5.909, it seems low as min = 0.530 and max = 25
+c)	CPI for year 1976 : 56.9 and CPI for year 2010 : 218.1
+d)	Mean hourly wage in 2010 = (218.056/56.9)*5.9089 which is equal to 22.644 dollars. Average hourly wage seems reasonable.
+e)  a<-wage1$female == 1
+sum(a)
+Ans. No. of Female = 252
+sum(1-a)
+Ans. No. of Male = 274
+2)
+a) 	meap01 <- data.table(dbReadTable(con,'meap01'))
+head(meap01)
+dbReadTable(con,'meap01_labels')
+summary(meap01$math4)	
+Ans. Min = 0  Max = 100
+b)	t<-c(meap01$math4==100.0)
+	sum(t)
+Ans. 38   and      (38/1823)*100 =  2.08 % of total sample
+c) 	q<-c(meap01$math4==50.0)
+Ans. 17
+d)            mean(meap01$math4)      ## 71.909
+mean(meap01$read4)        ##60.061
+Ans. Read4 is difficult to pass than Math4 as it’s average pass rate is less than that of math4.
+e)	cor(meap01$math4,meap01$read4)
+	Ans. 0.8427281
+Both are directly proportional to each other as the correlation coefficient is positive. Hence when Math4 increases , read4 also tend to increase.
+f)	mean(meap01$exppp)
+sd(meap01$exppp)
+summary(meap01$exppp)
+Ans. Mean of Expp  : 5194.865
+Sd of Expp : 1091.89, Yes there is wide variation per pupil spending as Min is 1207 and Max is 11958 and the distribution is left skewed.
+g)	b<-(6000-5500)/5500
+b
+Ans.
+	(6000-5500)/5500 = 0.09
+	100∗[log(6000)−log(5500) = 0.087
+3)
+a) k <- data.table(dbReadTable(con,'401k'))
+    head(k)
+    dbReadTable(con,'401k_labels')
+    lm<-lm(formula = prate~mrate+totpart+totelg+age+totemp+sole+ltotemp, data = k)
+    summary(lm2)  
+    summary(k$prate)
+    Mean of prate is 87.36
+    summary(k$mrate)
+    Mean of mrate is 0.7315
+b)
+     lm<-lm(formula = prate~mrate,  data = k)
+     summary(lm)
+
+      Ans.  Intercept = 83.0755
+	  mrate = 5.8611
+	  Multiple R squared :- 0.0747
+	  N = 1534
+Coefficients:
+            		Estimate 	Std. Error 	t value 		Pr(>|t|)    
+(Intercept)  	83.0755   	  0.5633  	147.48  		 <2e-16 ***
+mrate                  5.8611   	  0.5270  	 11.12   		 <2e-16 ***
+c) Since, B1 is 5.8611 and B0 = 83.0755 when mrate is 0 then also we have prate as 83.07 and 1 unit increase in the match rate will result in 5.86 % increase in participation rate. 
+d) When mrate is 3.5 then if we calculate the value of prate then it would be 83.0755+5.86(3.5) = 103.59
+      which is impossible as rate can’t exceed 100 percent. This is not a reasonable prediction. Sometimes, the model can predict strange values, it is just an exception.
+e) mrate explain around 7.47% variation in prate.
+
+4) ceosal2<-data.table(dbReadTable(con,'ceosal2'))
+    head(ceosal2)
+    dbReadTable(con,'ceosal2_labels')
+
+a)
+Summary(ceosal2$salary)
+Ans. Mean is 865.9
+Summary (ceosal2$ceoten)
+Ans. Mean is 7.955 
+b) sum(ceosal2$ceoten==0)
+    5 person are there in their first year of CEO.
+    max(ceosal2$ceoten)
+    Longest tenure as Ceo is 37 years.
+c) ceolm<-lm(formula = log(salary)~ceoten, data = ceosal2)
+The linear equation would be
+    Log(salary) = 6.51 + 0.0097 ceoten
+    Multiple R-squared:  0.01316 and N = 177
+Coefficients:
+          	      Estimate 	Std. Error	 t value		 Pr(>|t|)    
+(Intercept) 6.505498       0.067991 	 95.682 		  <2e-16 ***
+ceoten      0.009724  	 0.006364	   1.528  	    0.128    
+Now, a unit increase in ceoten will result in (100*0.0097) % increase in salary that means , one more year as ceo will lead to 0.97% increase in the salary.
+5)
+a) wage2 <- data.table(dbReadTable(con,'wage2'))
+    head(wage2)
+   summary(wage2$wage)
+   summary(wage2$IQ)
+   sd(wage2$IQ)
+
+ Ans. Mean of Salary is 957.9
+          Mean of IQ is 101.3
+          Standard Deviation of IQ is 15.05264.
+b)
+IQ1<-lm(formula = wage~IQ,data=wage2)
+summary(IQ1)
+The simple linear equation showing relation of wage and IQ is :
+Wage=116.99 + 8.30IQ
+N= 935, R square = 0.096
+So, increase of 15 points in IQ would lead to 8.30(15) = 124.5.
+And IQ explains only 9.5 % of the variation in wage that is quite less.
+c)
+IQ<-lm(formula = log(wage)~IQ,data=wage2)
+summary(IQ)
+The log-linear equation would be :
+Log(wage) = 5.886 + 0.088 IQ
+N = 935, R squared = 0.09909
+So, Increase of 15 points in IQ would lead to 0.0088(15)*100 = 13.2 % change in wage.
+6)
+a) meap93<-data.table(dbReadTable(con,'meap93'))
+mod<-lm(formula = math10 ~ expend, data = meap93)
+summary(mod)
+Intercept = 1.336e+1
+expend = 2.456e-03
+these are very less values and hence unit change in expenditure is not gonna make big impact on pass rate , it would have a very minimal affect on prate.
+b)  Since, In Linear Log equation  100% change in X results in B1 unit change in Y. So (100/10)=10 % change in X will result in  (B1/10) unit change in Y.
+c)
+mod1<-lm(formula = math10 ~ log(expend), data = meap93)
+summary(mod1)
+Intercept :       -69.341
+Log(expend) :  11.164
+N = 408, R squared = 0.02966
+d)
+math10 = -69.341 + 11.164(expend)
+if expend increases by 10% then math 10 is going to increase by (11.164/10)= 1.1 percentage points. The increment is not much but noticeable.
+e) One must not worry that regression analysis can produce fitted values for math10 that are greater than 100. This is not much of a worry in this dataset because the maximum value of expend here is 7419 which after putting in the equation gets reduced to 8.9 due to logarithm and we calculate the value of math10 now, it would come around 30. 
+
+7)
+a) 
+hprice<-lm(formula = price ~ sqrft+bdrms, data = hprice1)
+summary(hprice)
+The equation formed after building the model:
+Price = -19.315 + (0.12844) sqrft + (15.19819) brms + u
+b) Increased Price would be 15.19819 units.
+c) Estimated increase in price with a n additional bedroom that is 140 sqft would be 140*(0.12844) + 15.19819 = 33.179 units.
+d) R squared = 0.6319. Hence, 63.19 % of the variation is explained by square footage and number of bedrooms.
+e) Predicted selling price when there are 4 bedrooms and sqft area is 2438 is 354.6127 units.
+f) The actual seeling price for the first house was 300$. The buyer definitely underpaid for the house because the predicted price was 354.61. They paid 54.61 units less than the precited price.
+
+
+8)
+a)Model of Log-Log equation :
+model1<-lm(formula = log(salary) ~ log(sales)+log(mktval), data = ceosal2)
+summary(model)
+Coefficients:
+           				 Estimate       Std. Error
+(Intercept) 			 4.62092        0.25441  		
+log(sales)   			 0.16213        0.03967  		
+log(mktval)  			 0.10671
+Equation is :
+Log(salary)=4.62092 + 0.16213 log(sales) + 0.10671 log(mktval)
+
+b)
+model2<-lm(formula = log(salary) ~ log(sales)+log(mktval)+log(profits), data = ceosal2)
+summary(model)
+Log(salary)=4.62092 + 0.16213 log(sales) + 0.10671 log(mktval) – 0.10281 log(profits)
+
+Profits can not be included in logarithmic form because profit can be negative but log of negative value is not defined. Since R square is 0.3389, hence these variable explain 33.89% of salary variations.
+
+c)
+model3<-lm(formula = log(salary)~log(sales) + log(mktval) + profits+ceoten ,  data = ceosal2)
+summary(model) 
+Log(salary)= 4.558 + 0.1622 log(sales) + 0.1018log(mktval) + 2.905e-05 profits + 0.0116(ceoten)
+
+Another year of CEO tenure will result in 1.1% increase in salary keeping the other factors constant.
+d) cor(log(ceosal2$mktval),ceosal2$profits)
+Correlation coefficient between log(mktval) and profits is 0.7768. Both the variable are highly correlated that means they are directly proportional to each other. Increase in one variable will result in increase of other variable. Since, log of any negative number is not defined, so it becomes very difficult to explain their independent effect on the salary variable.
+
+9)
+a)
+attend<-data.table(dbReadTable(con,'attend'))
+dbReadTable(con,'attend_labels')
+summary(attend$atndrte)
+min : 6.25
+max : 100
+mean : 81.71
+summary(attend$priGPA)
+min : 0.857
+max : 3.930
+mean : 2.587
+summary(attend$ACT)
+min :    13
+max :   32
+mean : 22.51
+
+b)
+model8<-lm(formula = atndrte~priGPA+ACT , data = attend)
+summary(model8)
+The equation would be :
+atndrte = 75.70 + 17.261(priGPA)-1.717(ACT)
+If we take priGPA and ACT as 0 then attendance would come as 75.70 % that is impossible. Here, the intercept is misleading but it would be useful if calculated for other data points.
+
+c) There are two different slopes here , one associated with priGPA and one with ACT. ACT one is negative value that one unit increase in ACT would result in decrease attendance by 1.71 units whereas one unit increase in priGPA would result in increase of attendance by 17.261 units.
+d) When priGPA = 3.65 and ACT = 20 then atndrte would be 104.36 which is impossible. However, We have one value in the table which corresponds to the conditions given above.
+abc<-attend%>%filter(priGPA=3.65)
+view(abc)
+e) 
+Calculating attendance for Student A :
+a<-(75.70+(17.61*3.1)-(1.717*21))
+a = 94.234
+Calculating attendance for Student B :
+b <- (75.70+(17.61*2.1)-(1.717*26))
+b = 68.039
+Difference between their attendance would be (a-b) = 26.195.
+10)
+a)
+htv<-data.table(dbReadTable(con,'htv'))
+dbReadTable(con,'htv_labels')
+summary(htv$educ)
+Min = 6
+Max = 20
+Range = 20-6 = 14
+sum(htv$educ<=12)/1230
+56.74 % of men completed 12th grade but no higher grade.
+mean(htv$educ)
+Mean of men is 13.0374
+Means of their parents are :
+(mean(htv$fatheduc)+mean(htv$motheduc))/2
+Ans . 12.3126
+Hence, on an average Men have higher level of education than their parents.
+b)
+model11<-lm(educ~motheduc+fatheduc,data = htv)
+summary(model11)
+
+Coefficients:
+            		Estimate 	Std. Error 	t value 		Pr(>|t|)    
+(Intercept)  	6.96435   	 0.31982  	21.776   	<2e-16 ***
+motheduc    	0.30420   	 0.03193   	9.528   		<2e-16 ***
+fatheduc             0.19029   	 0.02228  	 8.539   		<2e-16 ***
+The equation would be : 
+
+Educ = 6.96435 + 0.30420 motheduc + 0.19029 fatheduc + u
+R squared = 0.2493 , hence 24.93 % men’s education variation is explained by parents education. If Mother’s education gets increased by 1 year, then child’s education will be increased by 0.30 years. Hence, Mother’s educ is playing a significant role in child’s education level.
+c)
+model12<-lm(educ~motheduc+fatheduc+abil,data = htv)
+summary(model12)
+The equation would be :
+Educ = 8.4486 + 0.18913 motheduc + 0.11109 fatheduc + 0.50248 abil + u
+Yes, definitely the R squared value has increased after adding abil to the model that means it is able to explain 42.75 % of variation in men’s education. The r square value is 0.4275.
+d)
+abil2 <- c((htv$abil)^2)
+model14<-lm(educ~motheduc+fatheduc+abil+abil2,data = htv)
+summary(model14)
+educ = 8.2402+0.1901*mean(htv$motheduc)+0.1089*mean(htv$fatheduc)+0.4014*(htv$abil)+
+0.0505*(htv$abil)^2
+
+Taking derivative with respect to abil on both sides will result in :
+D(educ)/D(abil) = 0.401 + 0.1 abil = 0 (Education is minimized)
+abil = -4.01
+D2(educ)/D2(abil) = 0.10 > 0 and hence we have a minimum.
+e) 
+sum(htv$abil<=-4.01)         ## 14
+Only 14 men out of 1230 have abil below -4.01. That means only 14 men have ability less than the value calculated above to have higher expected education level than others.
+model15<-lm(educ~motheduc+fatheduc+abil+(abil)^2,data = htv)
+summary(model15)
+f)
+plot <-ggplot(data=htv,aes(abil,educ))+geom_point(size=1)+scale_x_continuous('Ability')+scale_y_continuous()
+
+plot <- ggplot(data=htv,aes(abil,educ))+geom_point(size=1)+scale_x_continuous('Ability')+scale_y_continuous('Predicted'),color='red')
+
+
+
+
+
+
+
+
+
+
+
+
+          
+
+
+
+
+
