@@ -1,0 +1,16 @@
+library(bitops)
+library(XML)
+library(RCurl)
+u = c("The World's Most Valuable Brands List - Forbes.html")
+tables = readHTMLTable(u)
+str(tables)
+head(tables)
+
+data<-as.data.frame((tables$the_list))
+data<-data[-1]
+sum(is.na(data))->naomit
+write.csv(data,"data.csv",row.names = FALSE)
+data<-read.csv("data.csv",na.strings = c("-"))
+View(data)
+data<-na.omit(data)
+View(data)
